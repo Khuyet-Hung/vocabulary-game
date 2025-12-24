@@ -14,6 +14,8 @@ import { Word } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+export const dynamic = 'force-dynamic';
+
 export default function TestServicesPage() {
   const [sheetUrl, setSheetUrl] = useState('');
   const [status, setStatus] = useState('');
