@@ -43,7 +43,7 @@
 
   /* Touch-friendly sizes */
   .touch-target {
-    @apply min-h-[2.75rem] min-w-[2.75rem];
+    @apply min-h-11 min-w-11;
   }
 
   /* Prevent text selection */

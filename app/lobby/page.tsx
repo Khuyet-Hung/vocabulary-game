@@ -63,7 +63,7 @@ export default function LobbyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -163,7 +163,7 @@ export default function LobbyPage() {
                 <Card className="bg-blue-50 border-blue-200">
                   <CardContent className="pt-4">
                     <div className="flex gap-3">
-                      <Users className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                      <Users className="w-5 h-5 text-blue-600 shrink-0 mt-1" />
                       <div className="text-sm text-blue-900">
                         <p className="font-semibold mb-1">Điều khoản phòng:</p>
                         <ul className="space-y-1 text-xs">

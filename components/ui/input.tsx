@@ -1,7 +1,5 @@
 import * as React from 'react';
-
 import { cn } from '@/lib/utils';
-import { Label } from '@radix-ui/react-label';
 
 export interface InputProps extends React.ComponentProps<'input'> {
   label?: string;
@@ -16,12 +14,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full space-y-2">
         {label && (
-          <Label
+          <label
             htmlFor={inputId}
             className="text-sm font-medium text-gray-700"
           >
             {label}
-          </Label>
+          </label>
         )}
         <input
           id={inputId}

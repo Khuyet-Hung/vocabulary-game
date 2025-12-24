@@ -32,7 +32,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50">
       {/* Navigation */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -53,14 +53,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200 to-transparent rounded-full blur-3xl opacity-30" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-200 to-transparent rounded-full blur-3xl opacity-30" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-linear-to-br from-blue-200 to-transparent rounded-full blur-3xl opacity-30" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-linear-to-tr from-indigo-200 to-transparent rounded-full blur-3xl opacity-30" />
         </div>
 
         <div className="relative max-w-6xl mx-auto px-4 py-20 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Học Từ Vựng{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Thông Qua Trò Chơi
             </span>
           </h1>
@@ -125,7 +125,7 @@ export default function HomePage() {
             {games.map((game, i) => (
               <div
                 key={i}
-                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 text-center border border-blue-100 hover:shadow-md transition-shadow"
+                className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 text-center border border-blue-100 hover:shadow-md transition-shadow"
               >
                 <div className="text-blue-600 mb-4 flex justify-center">
                   {game.icon}
@@ -152,7 +152,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="max-w-6xl mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-12 text-center text-white">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-3xl p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Sẵn Sàng Bắt Đầu?</h2>
           <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
             Tham gia hàng nghìn người chơi khác và trở thành chuyên gia từ vựng

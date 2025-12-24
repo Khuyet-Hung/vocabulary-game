@@ -86,7 +86,7 @@ export default function RoomPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Đang tải phòng...</p>
@@ -103,7 +103,7 @@ export default function RoomPage() {
   const allReady = room.players.every((p) => p.isReady);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -131,7 +131,7 @@ export default function RoomPage() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Room Code Section */}
-        <Card className="mb-8 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <Card className="mb-8 border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50">
           <CardHeader>
             <CardTitle>Mã Phòng</CardTitle>
           </CardHeader>
@@ -220,7 +220,7 @@ export default function RoomPage() {
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
                         {player.name.charAt(0).toUpperCase()}
                       </div>
                       <div>

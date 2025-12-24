@@ -33,7 +33,7 @@ export function Header({
           {showBack && (
             <button
               onClick={handleBack}
-              className="flex-shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Go back"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700" />
@@ -44,7 +44,7 @@ export function Header({
           </h1>
         </div>
 
-        {rightAction && <div className="flex-shrink-0">{rightAction}</div>}
+        {rightAction && <div className="shrink-0">{rightAction}</div>}
       </div>
     </header>
   );
