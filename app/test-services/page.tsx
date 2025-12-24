@@ -11,6 +11,8 @@ import {
 } from '@/lib/firebase/wordsService';
 // import { Button } from '@/components/ui/Button';
 import { Word } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function TestServicesPage() {
   const [sheetUrl, setSheetUrl] = useState('');
@@ -54,31 +56,31 @@ export default function TestServicesPage() {
   return (
     <>
       Test Services Google Sheets URL:
-      <input
+      <Input
         type="text"
         value={sheetUrl}
         onChange={(e) => setSheetUrl(e.target.value)}
         placeholder="https://docs.google.com/spreadsheets/d/..."
         className="w-full px-4 py-2 border rounded-lg"
       />
-      <button
+      <Button
         onClick={handleImport}
         className="m-2 p-2 bg-blue-500 text-white rounded"
       >
         Import from Google Sheets
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={handleSaveToFirebase}
         className="m-2 p-2 bg-green-500 text-white rounded"
       >
         Save to Firebase
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={handleLoadFromFirebase}
         className="m-2 p-2 bg-yellow-500 text-white rounded"
       >
         Load from Firebase
-      </button>
+      </Button>
       {status && <div>{status}</div>}
       {words.length > 0 && (
         <>
