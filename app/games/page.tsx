@@ -115,7 +115,7 @@ export default function GamesPage() {
       joinedAt: Date.now(),
     };
     const roomData: CreateRoom = {
-      hostId: id,
+      hostPlayer,
       players: [hostPlayer],
       status: 'waiting',
       createdAt: Date.now(),
