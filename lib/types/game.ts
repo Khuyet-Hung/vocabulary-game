@@ -2,29 +2,17 @@ export interface Player {
   id: string;
   name: string;
   score: number;
-  avatar?: string;
+  // avatar?: string;
   isReady: boolean;
   joinedAt: number;
 }
 
 export interface GameSettings {
   maxPlayers: number;
-  questionsCount: number;
-  timePerQuestion: number;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
-}
-
-export interface Room {
-  id: string;
-  hostId: string;
-  players: Record<string, Player>;
-  status: 'waiting' | 'playing' | 'finished';
-  gameMode: string;
-  currentQuestionIndex: number;
-  settings: GameSettings;
-  createdAt: number;
-  startedAt?: number;
-  finishedAt?: number;
+  timePerQuestion?: number;
+  timeLimitPerGame?: number;
+  // questionsCount: number;
+  // difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
 }
 
 export interface Word {

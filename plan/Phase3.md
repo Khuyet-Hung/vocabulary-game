@@ -40,16 +40,16 @@ export interface ButtonProps extends ButtonHTMLAttributes {
 }
 
 export const Button = forwardRef(
-  ({ 
-    className, 
-    variant = 'primary', 
-    size = 'md', 
+  ({
+    className,
+    variant = 'primary',
+    size = 'md',
     isLoading,
     leftIcon,
     rightIcon,
     children,
     disabled,
-    ...props 
+    ...props
   }, ref) => {
     return (
       <button
@@ -65,17 +65,17 @@ export const Button = forwardRef(
           'touch-target',
           {
             // Variants
-            'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500': 
+            'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500':
               variant === 'primary',
-            'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400': 
+            'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400':
               variant === 'secondary',
-            'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500': 
+            'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500':
               variant === 'outline',
-            'hover:bg-gray-100 text-gray-700 focus:ring-gray-400': 
+            'hover:bg-gray-100 text-gray-700 focus:ring-gray-400':
               variant === 'ghost',
-            'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500': 
+            'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500':
               variant === 'danger',
-            
+
             // Sizes
             'px-3 py-1.5 text-sm': size === 'sm',
             'px-4 py-2 text-base': size === 'md',
@@ -89,7 +89,7 @@ export const Button = forwardRef(
         {!isLoading && leftIcon}
         {children}
         {!isLoading && rightIcon}
-      
+
     );
   }
 );
@@ -115,33 +115,33 @@ export interface InputProps extends InputHTMLAttributes {
 export const Input = forwardRef(
   ({ className, label, error, leftIcon, rightIcon, ...props }, ref) => {
     return (
-      
+
         {label && (
-          
+
             {label}
-          
+
         )}
-        
-        
+
+
           {leftIcon && (
-            
+
               {leftIcon}
-            
+
           )}
-          
-          
-          
+
+
+
           {rightIcon && (
-            
+
               {rightIcon}
-            
+
           )}
-        
-        
+
+
         {error && (
           {error}
         )}
-      
+
     );
   }
 );
@@ -178,7 +178,7 @@ export const Card = forwardRef(
         {...props}
       >
         {children}
-      
+
     );
   }
 );
@@ -224,13 +224,13 @@ interface ModalProps {
   showClose?: boolean;
 }
 
-export function Modal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
   size = 'md',
-  showClose = true 
+  showClose = true
 }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -238,7 +238,7 @@ export function Modal({
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -247,14 +247,14 @@ export function Modal({
   if (!isOpen) return null;
 
   return createPortal(
-    
+
       {isOpen && (
         <>
           {/* Backdrop */}
-          
-          
+
+
           {/* Modal */}
-          
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -270,22 +270,22 @@ export function Modal({
             >
               {/* Header */}
               {(title || showClose) && (
-                
+
                   {title && {title}}
                   {showClose && (
-                    
-                      
-                    
+
+
+
                   )}
-                
+
               )}
-              
+
               {/* Content */}
-              
+
                 {children}
-              
-            
-          
+
+
+
         </>
       )}
     ,
@@ -314,12 +314,12 @@ interface ToastProps {
   duration?: number;
 }
 
-export function Toast({ 
-  message, 
-  type, 
-  isVisible, 
+export function Toast({
+  message,
+  type,
+  isVisible,
   onClose,
-  duration = 3000 
+  duration = 3000
 }: ToastProps) {
   useEffect(() => {
     if (isVisible && duration > 0) {
@@ -335,9 +335,9 @@ export function Toast({
   };
 
   return (
-    
+
       {isVisible && (
-        
+
           <div
             className={cn(
               'flex items-center gap-3 p-4 rounded-lg shadow-lg',
@@ -350,13 +350,13 @@ export function Toast({
           >
             {icons[type]}
             {message}
-            
-              
-            
-          
-        
+
+
+
+
+
       )}
-    
+
   );
 }
 ```
@@ -379,9 +379,9 @@ interface ProgressBarProps {
   color?: 'primary' | 'success' | 'warning' | 'error';
 }
 
-export function ProgressBar({ 
-  value, 
-  max, 
+export function ProgressBar({
+  value,
+  max,
   className,
   showLabel = false,
   color = 'primary'
@@ -391,13 +391,13 @@ export function ProgressBar({
   return (
     <div className={cn('w-full', className)}>
       {showLabel && (
-        
+
           {value}/{max}
           {Math.round(percentage)}%
-        
+
       )}
-      
-      
+
+
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
@@ -409,8 +409,8 @@ export function ProgressBar({
             'bg-error-500': color === 'error',
           })}
         />
-      
-    
+
+
   );
 }
 ```
@@ -431,13 +431,7 @@ interface MobileContainerProps {
 }
 
 export function MobileContainer({ children }: MobileContainerProps) {
-  return (
-    
-      
-        {children}
-      
-    
-  );
+  return { children };
 }
 ```
 
@@ -470,17 +464,17 @@ export function Header({ title, showBack = false, rightAction, onBack }: HeaderP
   };
 
   return (
-    
+
       {showBack && (
-        
-          
-        
+
+
+
       )}
-      
+
       {title}
-      
+
       {rightAction}
-    
+
   );
 }
 ```
@@ -508,12 +502,12 @@ export function BottomNav() {
   const router = useRouter();
 
   return (
-    
-      
+
+
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.path;
-          
+
           return (
             <button
               key={item.path}
@@ -524,13 +518,13 @@ export function BottomNav() {
                 isActive ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
               )}
             >
-              
+
               {item.label}
-            
+
           );
         })}
-      
-    
+
+
   );
 }
 ```
@@ -565,21 +559,21 @@ const avatarColors = [
   'bg-teal-500',
 ];
 
-export function PlayerAvatar({ 
-  name, 
-  size = 'md', 
+export function PlayerAvatar({
+  name,
+  size = 'md',
   showName = false,
-  isOnline 
+  isOnline
 }: PlayerAvatarProps) {
   // Generate consistent color based on name
   const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % avatarColors.length;
   const bgColor = avatarColors[colorIndex];
-  
+
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    
-      
+
+
         <div
           className={cn(
             'flex items-center justify-center rounded-full text-white font-bold',
@@ -592,17 +586,17 @@ export function PlayerAvatar({
           )}
         >
           {initial}
-        
-        
+
+
         {isOnline !== undefined && (
-          
+
         )}
-      
-      
+
+
       {showName && (
         {name}
       )}
-    
+
   );
 }
 ```
@@ -621,13 +615,13 @@ interface LoadingSpinnerProps {
   fullScreen?: boolean;
 }
 
-export function LoadingSpinner({ 
-  size = 'md', 
+export function LoadingSpinner({
+  size = 'md',
   message,
-  fullScreen = false 
+  fullScreen = false
 }: LoadingSpinnerProps) {
   const content = (
-    
+
       <Loader2
         className={cn('animate-spin text-primary-600', {
           'w-6 h-6': size === 'sm',
@@ -638,14 +632,14 @@ export function LoadingSpinner({
       {message && (
         {message}
       )}
-    
+
   );
 
   if (fullScreen) {
     return (
-      
+
         {content}
-      
+
     );
   }
 
@@ -672,11 +666,7 @@ interface PageTransitionProps {
 }
 
 export function PageTransition({ children }: PageTransitionProps) {
-  return (
-    
-      {children}
-    
-  );
+  return { children };
 }
 ```
 
@@ -695,7 +685,10 @@ interface SlideTransitionProps {
   direction?: 'left' | 'right' | 'up' | 'down';
 }
 
-export function SlideTransition({ children, direction = 'right' }: SlideTransitionProps) {
+export function SlideTransition({
+  children,
+  direction = 'right',
+}: SlideTransitionProps) {
   const variants = {
     left: { x: -100 },
     right: { x: 100 },
@@ -703,11 +696,7 @@ export function SlideTransition({ children, direction = 'right' }: SlideTransiti
     down: { y: 100 },
   };
 
-  return (
-    
-      {children}
-    
-  );
+  return { children };
 }
 ```
 
@@ -740,88 +729,88 @@ export default function ComponentsTestPage() {
   const [showToast, setShowToast] = useState(false);
 
   return (
-    
-      
-      
-      
+
+
+
+
         {/* Buttons */}
-        
-          
+
+
             Buttons
-          
-          
+
+
             Primary Button
             Secondary Button
             Outline Button
             Ghost Button
             Loading...
-          
-        
+
+
 
         {/* Inputs */}
-        
-          
+
+
             Inputs
-          
-          
-            
+
+
+
             }
             />
-            
-          
-        
+
+
+
 
         {/* Progress */}
-        
-          
+
+
             Progress Bar
-          
-          
-            
-            
-          
-        
+
+
+
+
+
+
 
         {/* Avatars */}
-        
-          
+
+
             Player Avatars
-          
-          
-            
-            
-            
-          
-        
+
+
+
+
+
+
+
 
         {/* Modal & Toast Triggers */}
-        
-          
+
+
             Overlays
-          
-          
+
+
             <Button onClick={() => setShowModal(true)}>
               Open Modal
-            
-            <Button 
+
+            <Button
               variant="secondary"
               onClick={() => setShowToast(true)}
             >
               Show Toast
-            
-          
-        
+
+
+
 
         {/* Loading */}
-        
-          
+
+
             Loading States
-          
-          
-            
-          
-        
-      
+
+
+
+
+
+
 
       {/* Modal */}
       <Modal
@@ -832,8 +821,8 @@ export default function ComponentsTestPage() {
         This is a modal dialog!
         <Button className="mt-4" onClick={() => setShowModal(false)}>
           Close
-        
-      
+
+
 
       {/* Toast */}
       <Toast
@@ -842,7 +831,7 @@ export default function ComponentsTestPage() {
         isVisible={showToast}
         onClose={() => setShowToast(false)}
       />
-    
+
   );
 }
 ```
@@ -870,6 +859,7 @@ export default function ComponentsTestPage() {
 ➡️ **[Phase 4: Main Pages & Game Hub](./PHASE_4_Main_Pages_Game_Hub.md)**
 
 Trong Phase 4, chúng ta sẽ:
+
 - Tạo Home page
 - Tạo Games Hub
 - Tạo Lobby page

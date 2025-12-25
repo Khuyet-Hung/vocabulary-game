@@ -13,6 +13,10 @@ import {
   Star,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Header } from '@/components/layout/Header';
+import { CreateRoom, Player, Room } from '@/lib/types';
+import { useCreateRoom } from '@/lib/api/hooks/useRoom';
+import { toast } from 'sonner';
 
 interface GameCard {
   id: string;
@@ -67,8 +71,13 @@ const games: GameCard[] = [
   },
 ];
 
+const randomRoomId = () => {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+};
+
 export default function GamesPage() {
   const router = useRouter();
+  const { mutate: createRoom, isPending } = useCreateRoom();
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -96,152 +105,169 @@ export default function GamesPage() {
     }
   };
 
+  const handleCreateRoom = async (gameId: string) => {
+    const id = randomRoomId();
+    const hostPlayer: Player = {
+      id: id,
+      name: `Host_${id}`,
+      score: 0,
+      isReady: false,
+      joinedAt: Date.now(),
+    };
+    const roomData: CreateRoom = {
+      hostId: id,
+      players: [hostPlayer],
+      status: 'waiting',
+      createdAt: Date.now(),
+      settings: {
+        maxPlayers: 4,
+        timeLimitPerGame: 300,
+      },
+      gameMode: gameId,
+    };
+
+    createRoom(roomData, {
+      onSuccess: (roomId) => {
+        router.push(`/games/${gameId}/rooms/${roomId}`);
+      },
+      onError: (error) => {
+        toast.error(`Lỗi tạo phòng: ${error.message}`);
+      },
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Chọn Trò Chơi</h1>
-        </div>
-      </header>
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        {/* Main Content */}
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 pb-12">
+          {/* Games Grid */}
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {games.map((game, index) => {
+              const Icon = game.icon;
+              const isLocked = game.status === 'coming-soon';
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Intro Section */}
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Khám Phá Các Trò Chơi Học Từ Vựng
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Chọn trò chơi yêu thích của bạn để bắt đầu học từ vựng một cách vui
-            vẻ và hiệu quả.
-          </p>
-        </div>
-
-        {/* Games Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {games.map((game, index) => {
-            const Icon = game.icon;
-            const isLocked = game.status === 'coming-soon';
-
-            return (
-              <motion.div
-                key={game.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <div
-                  className={`relative group ${isLocked ? 'opacity-75' : ''}`}
+              return (
+                <motion.div
+                  key={game.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   <div
-                    className={`absolute inset-0 bg-gradient-to-r ${game.gradient} rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity`}
-                  />
+                    className={`relative group ${isLocked ? 'opacity-75' : ''}`}
+                  >
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-r ${game.gradient} rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity`}
+                    />
 
-                  <Card className="relative border-0 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
-                    {/* Gradient Top Bar */}
-                    <div className={`h-1 bg-gradient-to-r ${game.gradient}`} />
+                    <Card className="relative border-0 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+                      {/* Gradient Top Bar */}
+                      <div
+                        className={`h-1 bg-gradient-to-r ${game.gradient}`}
+                      />
 
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`p-3 rounded-xl bg-gradient-to-r ${game.gradient} text-white`}
-                          >
-                            <Icon className="w-6 h-6" />
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`p-3 rounded-xl bg-gradient-to-r ${game.gradient} text-white`}
+                            >
+                              <Icon className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-xl">
+                                {game.title}
+                              </CardTitle>
+                              {!isLocked && (
+                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                  <span
+                                    className={`px-2 py-1 rounded-full ${getDifficultyColor(
+                                      game.difficulty
+                                    )}`}
+                                  >
+                                    {getDifficultyLabel(game.difficulty)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <CardTitle className="text-xl">
-                              {game.title}
-                            </CardTitle>
-                            {!isLocked && (
-                              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                                <span
-                                  className={`px-2 py-1 rounded-full ${getDifficultyColor(
-                                    game.difficulty
-                                  )}`}
-                                >
-                                  {getDifficultyLabel(game.difficulty)}
-                                </span>
-                              </div>
-                            )}
+                          {isLocked && (
+                            <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          )}
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="space-y-4">
+                        <p className="text-gray-600">{game.description}</p>
+
+                        {!isLocked && game.players && (
+                          <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span>
+                              {game.players
+                                .toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
+                              người chơi
+                            </span>
                           </div>
-                        </div>
-                        {isLocked && (
-                          <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
                         )}
-                      </div>
-                    </CardHeader>
 
-                    <CardContent className="space-y-4">
-                      <p className="text-gray-600">{game.description}</p>
+                        <Button
+                          className="w-full h-11"
+                          disabled={isLocked || isPending}
+                          onClick={() =>
+                            isLocked ? null : handleCreateRoom(game.id)
+                          }
+                        >
+                          {isLocked ? (
+                            <>
+                              <Lock className="w-4 h-4 mr-2" />
+                              Sắp Ra Mắt
+                            </>
+                          ) : isPending ? (
+                            'Đang tạo...'
+                          ) : (
+                            'Tạo phòng'
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
 
-                      {!isLocked && game.players && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-                          <Star className="w-4 h-4 text-yellow-500" />
-                          <span>
-                            {game.players.toLocaleString()} người chơi
-                          </span>
-                        </div>
-                      )}
-
-                      <Button
-                        className="w-full h-11"
-                        disabled={isLocked}
-                        onClick={() =>
-                          isLocked ? null : router.push(`/game/${game.id}`)
-                        }
-                      >
-                        {isLocked ? (
-                          <>
-                            <Lock className="w-4 h-4 mr-2" />
-                            Sắp Ra Mắt
-                          </>
-                        ) : (
-                          'Chơi Ngay'
-                        )}
-                      </Button>
-                    </CardContent>
-                  </Card>
+          {/* Info Section */}
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+            <CardContent className="pt-6">
+              <div className="flex gap-4">
+                <div className="text-3xl">💡</div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Mẹo Học Hiệu Quả
+                  </h3>
+                  <ul className="text-gray-600 space-y-1 text-sm">
+                    <li>• Chơi hàng ngày để duy trì streak</li>
+                    <li>• Thử tất cả các game mode để phát triển kỹ năng</li>
+                    <li>• Cạnh tranh với bạn bè để tăng động lực</li>
+                  </ul>
                 </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Info Section */}
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex gap-4">
-              <div className="text-3xl">💡</div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  Mẹo Học Hiệu Quả
-                </h3>
-                <ul className="text-gray-600 space-y-1 text-sm">
-                  <li>• Chơi hàng ngày để duy trì streak</li>
-                  <li>• Thử tất cả các game mode để phát triển kỹ năng</li>
-                  <li>• Cạnh tranh với bạn bè để tăng động lực</li>
-                </ul>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Coming Soon Info */}
-        <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl text-center">
-          <p className="text-yellow-900">
-            🚀 <strong>Các game mode mới đang được phát triển!</strong> Theo dõi
-            để không bỏ lỡ những cập nhật sắp tới.
-          </p>
+          {/* Coming Soon Info */}
+          <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl text-center">
+            <p className="text-yellow-900">
+              🚀 <strong>Các game mode mới đang được phát triển!</strong> Theo
+              dõi để không bỏ lỡ những cập nhật sắp tới.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

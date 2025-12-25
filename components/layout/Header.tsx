@@ -1,51 +1,29 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Coins } from 'lucide-react';
+import Image from 'next/image';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
-  title: string;
-  showBack?: boolean;
-  rightAction?: React.ReactNode;
-  onBack?: () => void;
+  className?: string;
 }
 
-export function Header({
-  title,
-  showBack = false,
-  rightAction,
-  onBack,
-}: HeaderProps) {
+export function Header({ className }: HeaderProps) {
   const router = useRouter();
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      router.back();
-    }
-  };
-
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm">
-      <div className="px-4 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {showBack && (
-            <button
-              onClick={handleBack}
-              className="shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </button>
-          )}
-          <h1 className="text-lg font-semibold text-gray-900 truncate">
-            {title}
-          </h1>
-        </div>
-
-        {rightAction && <div className="shrink-0">{rightAction}</div>}
-      </div>
+    <header
+      className={`sticky top-0 z-40 w-full bg-transparent backdrop-blur-md ${className}`}
+    >
+      <Button
+        variant="link"
+        className="px-4 py-6 flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Quay Lại
+      </Button>
     </header>
   );
 }

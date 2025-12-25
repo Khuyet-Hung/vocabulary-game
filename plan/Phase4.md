@@ -36,88 +36,88 @@ export default function HomePage() {
   const router = useRouter();
 
   return (
-    
-      
-        
+
+
+
           {/* Hero Section */}
-          
+
             {/* Decorative Elements */}
-            
-            
+
+
 
             {/* Content */}
-            
-              
-            
 
-            
+
+
+
+
               Vocab Game
-            
 
-            
+
+
               Học từ vựng qua trò chơi - vui và hiệu quả!
-            
 
-            
-              
+
+
+
               Realtime Multiplayer
-            
-          
+
+
 
           {/* Menu Section */}
-          
-            
+
+
               <Button
                 size="lg"
                 className="w-full flex items-center justify-center gap-3 h-16"
                 onClick={() => router.push('/lobby')}
               >
-                
-                
+
+
                   Chơi Online
                   Chơi với bạn bè realtime
-                
-              
-            
 
-            
+
+
+
+
               <Button
                 size="lg"
                 variant="outline"
                 className="w-full flex items-center justify-center gap-3 h-16"
                 onClick={() => router.push('/games')}
               >
-                
-                
+
+
                   Chọn Game
                   Khám phá các trò chơi
-                
-              
-            
 
-            
+
+
+
+
               <Button
                 size="lg"
                 variant="ghost"
                 className="w-full flex items-center justify-center gap-3 h-16"
                 onClick={() => router.push('/leaderboard')}
               >
-                
-                
+
+
                   Bảng Xếp Hạng
                   Xem top người chơi
-                
-              
-            
-          
+
+
+
+
 
           {/* Footer */}
-          
+
             v1.0.0 - Built with ❤️
-          
-        
-      
-    
+
+
+
+
   );
 }
 ```
@@ -184,65 +184,65 @@ const games: GameCard[] = [
 
 export default function GamesPage() {
   return (
-    
-      
 
-      
-        
+
+
+
+
           {games.map((game, index) => {
             const Icon = game.icon;
-            
+
             return (
-              
+
                 <button
                   className="w-full p-6 rounded-2xl shadow-lg bg-white border-2 border-gray-100 hover:border-primary-300 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={game.status === 'coming-soon'}
                 >
-                  
+
                     {/* Icon */}
-                    
-                      
-                    
+
+
+
 
                     {/* Content */}
-                    
-                      
+
+
                         {game.title}
                         {game.status === 'coming-soon' && (
-                          
-                            
+
+
                             Sắp ra mắt
-                          
+
                         )}
-                      
+
                       {game.description}
-                    
-                  
-                
-              
+
+
+
+
             );
           })}
 
           {/* Info Box */}
-          
-            
-              
+
+
+
                 💡
-                
-                  
+
+
                     Đang phát triển
-                  
-                  
-                    Các game mode mới sẽ được cập nhật thường xuyên. 
+
+
+                    Các game mode mới sẽ được cập nhật thường xuyên.
                     Theo dõi để không bỏ lỡ nhé!
-                  
-                
-              
-            
-          
-        
-      
-    
+
+
+
+
+
+
+
+
   );
 }
 ```
@@ -267,7 +267,7 @@ import { Plus, LogIn, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { RealtimeService } from '@/lib/firebase/realtimeService';
 import { useGameStore } from '@/lib/store/gameStore';
-import { generateId } from '@/lib/utils/idGenerator';
+import { generateId } from '@/lib/utils/cn/idGenerator';
 
 export default function LobbyPage() {
   const router = useRouter();
@@ -285,7 +285,7 @@ export default function LobbyPage() {
 
     setLoading(true);
     setError('');
-    
+
     try {
       const player = {
         id: generateId('player'),
@@ -317,7 +317,7 @@ export default function LobbyPage() {
       setError('Vui lòng nhập tên của bạn');
       return;
     }
-    
+
     if (!roomCode.trim()) {
       setError('Vui lòng nhập mã phòng');
       return;
@@ -325,7 +325,7 @@ export default function LobbyPage() {
 
     setLoading(true);
     setError('');
-    
+
     try {
       const player = {
         id: generateId('player'),
@@ -347,13 +347,13 @@ export default function LobbyPage() {
   };
 
   return (
-    
-      
 
-      
-        
+
+
+
+
           {/* Player Name Input */}
-          
+
             <Input
               label="Tên của bạn"
               value={playerName}
@@ -366,46 +366,46 @@ export default function LobbyPage() {
               maxLength={20}
               error={error && !playerName.trim() ? error : ''}
             />
-          
+
 
           {/* Create Room */}
-          
-            
-              
-                
-              
-              
-                
+
+
+
+
+
+
+
                   Tạo Phòng Mới
-                
-                
+
+
                   Tạo phòng và mời bạn bè tham gia cùng
-                
-              
-            
-            
-              
+
+
+
+
+
               Tạo Phòng
-            
-          
+
+
 
           {/* Join Room */}
-          
-            
-              
-                
-              
-              
-                
+
+
+
+
+
+
+
                   Vào Phòng
-                
-                
+
+
                   Nhập mã phòng để tham gia ngay
-                
-              
-            
-            
-            
+
+
+
+
+
               <Input
                 value={roomCode}
                 onChange={(e) => {
@@ -417,23 +417,23 @@ export default function LobbyPage() {
                 error={error && !roomCode.trim() ? error : ''}
                 className="text-center text-lg font-mono font-bold tracking-wider"
               />
-              
-              
-                
+
+
+
                 Vào Phòng
-              
-            
-          
+
+
+
 
           {/* Error Message */}
           {error && (
-            
+
               {error}
-            
+
           )}
-        
-      
-    
+
+
+
   );
 }
 ```
@@ -466,7 +466,7 @@ export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
   const roomId = params.id as string;
-  
+
   const { currentPlayer, setCurrentRoom } = useGameStore();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -506,17 +506,17 @@ export default function RoomPage() {
 
   const handleToggleReady = async () => {
     if (!currentPlayer || !room) return;
-    
+
     const newReadyState = !room.players[currentPlayer.id]?.isReady;
     await RealtimeService.updatePlayerReady(roomId, currentPlayer.id, newReadyState);
   };
 
   const handleStartGame = async () => {
     if (!currentPlayer || !room) return;
-    
+
     // Check if all players are ready
     const allReady = Object.values(room.players).every((p) => p.isReady);
-    
+
     if (!allReady) {
       alert('Chờ tất cả người chơi sẵn sàng!');
       return;
@@ -527,16 +527,16 @@ export default function RoomPage() {
 
   const handleLeaveRoom = async () => {
     if (!currentPlayer) return;
-    
+
     await RealtimeService.leaveRoom(roomId, currentPlayer.id);
     router.push('/');
   };
 
   if (loading) {
     return (
-      
-        
-      
+
+
+
     );
   }
 
@@ -550,106 +550,106 @@ export default function RoomPage() {
   const playerCount = players.length;
 
   return (
-    
-      
 
-      
-        
+
+
+
+
           {/* Room Code Card */}
-          
-            
+
+
               Mã Phòng
-              
-                
+
+
                   {roomId}
-                
-                
+
+
                   {copied ? (
-                    
+
                   ) : (
-                    
+
                   )}
-                
-              
-              
+
+
+
                 Chia sẻ mã này với bạn bè
-              
-            
-          
+
+
+
 
           {/* Room Info */}
-          
-            
-              
+
+
+
               {playerCount}/{room.settings.maxPlayers}
               Người chơi
-            
-            
-            
-              
+
+
+
+
               {room.settings.questionsCount}
               Câu hỏi
-            
-          
+
+
 
           {/* Players List */}
-          
-            
-              
+
+
+
               Người Chơi
-            
-            
-            
-              
+
+
+
+
                 {players.map((player, index) => (
-                  
-                    
-                    
-                    
-                      
+
+
+
+
+
                         {player.name}
                         {room.hostId === player.id && (
-                          
+
                         )}
-                      
-                      
+
+
                         {player.isReady ? '✅ Sẵn sàng' : '⏳ Chưa sẵn sàng'}
-                      
-                    
-                  
+
+
+
                 ))}
-              
-            
-          
+
+
+
 
           {/* Action Buttons */}
-          
+
             {isHost ? (
-              
+
                 Bắt Đầu Game
-              
+
             ) : (
-              
+
                 {room.players[currentPlayer.id]?.isReady ? 'Hủy Sẵn Sàng' : 'Sẵn Sàng'}
-              
+
             )}
-            
-            
+
+
               Rời Phòng
-            
-          
+
+
 
           {/* Instructions */}
           {isHost && !allReady && (
-            
-              
+
+
                 💡 Chờ tất cả người chơi sẵn sàng trước khi bắt đầu game
-              
-            
+
+
           )}
-        
-      
-    
+
+
+
   );
 }
 ```
@@ -700,6 +700,7 @@ npm run dev
 ➡️ **[Phase 5: Testing & Refinement](./PHASE_5_Testing_Refinement.md)**
 
 Trong Phase 5, chúng ta sẽ:
+
 - Test toàn bộ flow
 - Test trên mobile devices
 - Fix bugs

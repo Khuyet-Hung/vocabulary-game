@@ -29,7 +29,7 @@ interface Room {
   createdAt: number;
 }
 
-export default function RoomPage() {
+export default function CreateRoomPage() {
   const params = useParams();
   const router = useRouter();
   const roomId = (params.id as string) || '';
@@ -39,28 +39,26 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  const randomRoomId = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
   useEffect(() => {
-    // Simulate loading room data
-    setTimeout(() => {
-      setRoom({
-        id: roomId,
-        hostId: currentPlayerId,
-        players: [
-          { id: currentPlayerId, name: 'Bạn', score: 0, isReady: false },
-          { id: 'player-2', name: 'Người chơi 2', score: 0, isReady: false },
-        ],
-        status: 'waiting',
-        settings: {
-          maxPlayers: 8,
-          questionsCount: 10,
-          timePerQuestion: 30,
-          difficulty: 'mixed',
-        },
-        createdAt: Date.now(),
-      });
-      setLoading(false);
-    }, 500);
-  }, [roomId, currentPlayerId]);
+    const newRoomId = randomRoomId();
+    setRoom({
+      id: newRoomId,
+      settings: {
+        maxPlayers: 8,
+        questionsCount: 10,
+        timePerQuestion: 30,
+        difficulty: 'mixed',
+      },
+      hostId: currentPlayerId,
+      players: [{ id: currentPlayerId, name: 'Bạn', score: 0, isReady: false }],
+      status: 'waiting',
+      createdAt: Date.now(),
+    });
+  }, []);
 
   const handleCopyRoomCode = () => {
     navigator.clipboard.writeText(roomId);
@@ -83,17 +81,6 @@ export default function RoomPage() {
   const handleLeaveRoom = () => {
     router.push('/lobby');
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Đang tải phòng...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!room) {
     return null;
@@ -139,13 +126,36 @@ export default function RoomPage() {
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <Users className="w-5 h-5 text-blue-600 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-600">Người chơi</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {room.players.length}/{room.settings.maxPlayers}
-                  </p>
+              <div className="flex flex-row">
+                {/* Người chơi */}
+                <div className="flex items-start gap-3">
+                  <Users className="w-5 h-5 text-blue-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-600">Người chơi</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {room.players.length}/{room.settings.maxPlayers}
+                    </p>
+                  </div>
+                </div>
+                {/* Câu hỏi */}
+                <div className="flex items-start gap-3">
+                  <Zap className="w-5 h-5 text-purple-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-600">Câu hỏi</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {room.settings.questionsCount}
+                    </p>
+                  </div>
+                </div>
+                {/* Thời gian/Câu */}
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-orange-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-600">Thời gian/Câu</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {room.settings.timePerQuestion}s
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>

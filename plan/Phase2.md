@@ -39,49 +39,45 @@ export interface SheetWord {
 export function convertToCSVUrl(shareUrl: string): string {
   // From: https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=0
   // To: https://docs.google.com/spreadsheets/d/SHEET_ID/export?format=csv&gid=0
-  
+
   const sheetIdMatch = shareUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
   if (!sheetIdMatch) {
     throw new Error('Invalid Google Sheets URL');
   }
-  
+
   const sheetId = sheetIdMatch[1];
   const gidMatch = shareUrl.match(/gid=([0-9]+)/);
   const gid = gidMatch ? gidMatch[1] : '0';
-  
+
   return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 }
 
 /**
  * Import words from Google Sheets
  */
-export async function importFromGoogleSheets(
-  sheetUrl: string
-): Promise {
+export async function importFromGoogleSheets(sheetUrl: string): Promise {
   try {
     const csvUrl = convertToCSVUrl(sheetUrl);
-    
+
     const response = await fetch(csvUrl);
     if (!response.ok) {
       throw new Error('Failed to fetch Google Sheets data');
     }
-    
+
     const csvText = await response.text();
-    
+
     return new Promise((resolve, reject) => {
       Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
         transformHeader: (header) => header.trim().toLowerCase(),
         complete: (results) => {
-          const words = results.data.filter((row) => 
-            row.word && row.meaning
-          );
+          const words = results.data.filter((row) => row.word && row.meaning);
           resolve(words);
         },
         error: (error) => {
           reject(new Error(`Parse error: ${error.message}`));
-        }
+        },
       });
     });
   } catch (error) {
@@ -99,28 +95,28 @@ export function validateWords(words: SheetWord[]): {
 } {
   const valid: SheetWord[] = [];
   const invalid: Array = [];
-  
+
   words.forEach((word, index) => {
     if (!word.word || word.word.trim() === '') {
       invalid.push({ row: index + 2, reason: 'Missing word' });
       return;
     }
-    
+
     if (!word.meaning || word.meaning.trim() === '') {
       invalid.push({ row: index + 2, reason: 'Missing meaning' });
       return;
     }
-    
+
     valid.push({
       ...word,
       word: word.word.trim(),
       meaning: word.meaning.trim(),
       example: word.example?.trim(),
       category: word.category?.trim(),
-      difficulty: word.difficulty || 'medium'
+      difficulty: word.difficulty || 'medium',
     });
   });
-  
+
   return { valid, invalid };
 }
 ```
@@ -144,21 +140,23 @@ export async function saveWordsToFirebase(
 ): Promise {
   try {
     const wordsRef = ref(database, `words/${category}`);
-    
+
     // Convert to Word format with IDs
     const wordsData: Record = {};
     words.forEach((word) => {
-      const id = `word_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const id = `word_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(7)}`;
       wordsData[id] = {
         id,
         word: word.word,
         meaning: word.meaning,
         example: word.example,
         category: word.category || category,
-        difficulty: word.difficulty || 'medium'
+        difficulty: word.difficulty || 'medium',
       };
     });
-    
+
     await set(wordsRef, wordsData);
   } catch (error) {
     console.error('Error saving words to Firebase:', error);
@@ -175,11 +173,11 @@ export async function getWordsFromFirebase(
   try {
     const wordsRef = ref(database, `words/${category}`);
     const snapshot = await get(wordsRef);
-    
+
     if (!snapshot.exists()) {
       return [];
     }
-    
+
     const wordsData = snapshot.val();
     return Object.values(wordsData);
   } catch (error) {
@@ -217,15 +215,15 @@ export function getRandomWords(words: Word[], count: number): Word[] {
 ```typescript
 // lib/firebase/realtimeService.ts
 
-import { 
-  ref, 
-  onValue, 
-  set, 
-  push, 
-  update, 
-  remove, 
+import {
+  ref,
+  onValue,
+  set,
+  push,
+  update,
+  remove,
   get,
-  Unsubscribe 
+  Unsubscribe,
 } from 'firebase/database';
 import { database } from './config';
 import { Room, Player, GameSettings } from '../types';
@@ -235,14 +233,11 @@ export class RealtimeService {
   /**
    * Create a new room
    */
-  static async createRoom(
-    hostPlayer: Player,
-    settings: GameSettings
-  ): Promise {
+  static async createRoom(hostPlayer: Player, settings: GameSettings): Promise {
     try {
       const roomCode = generateRoomCode();
       const roomRef = ref(database, `rooms/${roomCode}`);
-      
+
       const room: Room = {
         id: roomCode,
         hostId: hostPlayer.id,
@@ -251,9 +246,9 @@ export class RealtimeService {
         gameMode: 'multiple-choice',
         currentQuestionIndex: 0,
         settings,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
-      
+
       await set(roomRef, room);
       return roomCode;
     } catch (error) {
@@ -261,7 +256,7 @@ export class RealtimeService {
       throw error;
     }
   }
-  
+
   /**
    * Join an existing room
    */
@@ -269,36 +264,36 @@ export class RealtimeService {
     try {
       const roomRef = ref(database, `rooms/${roomId}`);
       const snapshot = await get(roomRef);
-      
+
       if (!snapshot.exists()) {
         throw new Error('Phòng không tồn tại');
       }
-      
+
       const room = snapshot.val() as Room;
-      
+
       // Check room status
       if (room.status !== 'waiting') {
         throw new Error('Phòng đã bắt đầu chơi');
       }
-      
+
       // Check max players
       const playerCount = Object.keys(room.players).length;
       if (playerCount >= room.settings.maxPlayers) {
         throw new Error('Phòng đã đầy');
       }
-      
+
       // Add player to room
       await update(roomRef, {
-        [`players/${player.id}`]: player
+        [`players/${player.id}`]: player,
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error joining room:', error);
       throw error;
     }
   }
-  
+
   /**
    * Listen to room updates
    */
@@ -307,7 +302,7 @@ export class RealtimeService {
     callback: (room: Room | null) => void
   ): Unsubscribe {
     const roomRef = ref(database, `rooms/${roomId}`);
-    
+
     return onValue(roomRef, (snapshot) => {
       if (snapshot.exists()) {
         callback(snapshot.val() as Room);
@@ -316,7 +311,7 @@ export class RealtimeService {
       }
     });
   }
-  
+
   /**
    * Update player ready status
    */
@@ -333,7 +328,7 @@ export class RealtimeService {
       throw error;
     }
   }
-  
+
   /**
    * Update game status
    */
@@ -344,20 +339,20 @@ export class RealtimeService {
     try {
       const roomRef = ref(database, `rooms/${roomId}`);
       const updateData: any = { status };
-      
+
       if (status === 'playing') {
         updateData.startedAt = Date.now();
       } else if (status === 'finished') {
         updateData.finishedAt = Date.now();
       }
-      
+
       await update(roomRef, updateData);
     } catch (error) {
       console.error('Error updating game status:', error);
       throw error;
     }
   }
-  
+
   /**
    * Update current question index
    */
@@ -373,7 +368,7 @@ export class RealtimeService {
       throw error;
     }
   }
-  
+
   /**
    * Update player score
    */
@@ -390,7 +385,7 @@ export class RealtimeService {
       throw error;
     }
   }
-  
+
   /**
    * Leave room
    */
@@ -398,15 +393,15 @@ export class RealtimeService {
     try {
       const playerRef = ref(database, `rooms/${roomId}/players/${playerId}`);
       await remove(playerRef);
-      
+
       // Check if room is empty
       const roomRef = ref(database, `rooms/${roomId}`);
       const snapshot = await get(roomRef);
-      
+
       if (snapshot.exists()) {
         const room = snapshot.val() as Room;
         const remainingPlayers = Object.keys(room.players);
-        
+
         // Delete room if empty
         if (remainingPlayers.length === 0) {
           await remove(roomRef);
@@ -422,7 +417,7 @@ export class RealtimeService {
       throw error;
     }
   }
-  
+
   /**
    * Delete room
    */
@@ -461,22 +456,19 @@ export function generateMultipleChoiceQuestion(
     .filter((w) => w.id !== targetWord.id)
     .sort(() => Math.random() - 0.5)
     .slice(0, 3);
-  
+
   // Combine with correct answer
-  const options = [
-    targetWord.meaning,
-    ...wrongWords.map((w) => w.meaning)
-  ];
-  
+  const options = [targetWord.meaning, ...wrongWords.map((w) => w.meaning)];
+
   // Shuffle options
   const shuffledOptions = options.sort(() => Math.random() - 0.5);
-  
+
   return {
     id: `q_${targetWord.id}`,
     word: targetWord,
     options: shuffledOptions,
     correctAnswer: targetWord.meaning,
-    type: 'multiple-choice'
+    type: 'multiple-choice',
   };
 }
 
@@ -489,13 +481,13 @@ export function generateFillBlankQuestion(word: Word): Question {
     new RegExp(word.word, 'gi'),
     '______'
   );
-  
+
   return {
     id: `q_${word.id}`,
     word: { ...word, example: blankedSentence },
     options: [],
     correctAnswer: word.word,
-    type: 'fill-blank'
+    type: 'fill-blank',
   };
 }
 
@@ -508,7 +500,7 @@ export function generateFlashcard(word: Word): Question {
     word,
     options: [],
     correctAnswer: word.meaning,
-    type: 'flashcard'
+    type: 'flashcard',
   };
 }
 
@@ -521,21 +513,21 @@ export function generateQuestions(
   count: number
 ): Question[] {
   const selectedWords = words.slice(0, count);
-  
+
   switch (gameMode) {
     case 'multiple-choice':
       return selectedWords.map((word) =>
         generateMultipleChoiceQuestion(word, words)
       );
-    
+
     case 'fill-blank':
       return selectedWords
         .filter((word) => word.example)
         .map((word) => generateFillBlankQuestion(word));
-    
+
     case 'flashcard':
       return selectedWords.map((word) => generateFlashcard(word));
-    
+
     default:
       return [];
   }
@@ -556,10 +548,10 @@ export function calculateScore(
   timeSpent: number
 ): number {
   if (!isCorrect) return 0;
-  
+
   const baseScore = 100;
   const timeBonus = Math.max(0, ((timeLimit - timeSpent) / timeLimit) * 50);
-  
+
   return Math.round(baseScore + timeBonus);
 }
 
@@ -568,7 +560,7 @@ export function calculateScore(
  */
 export function calculateRank(score: number, totalQuestions: number): string {
   const percentage = (score / (totalQuestions * 150)) * 100;
-  
+
   if (percentage >= 90) return 'Xuất sắc';
   if (percentage >= 75) return 'Giỏi';
   if (percentage >= 60) return 'Khá';
@@ -615,7 +607,7 @@ module.exports = {
         error: {
           500: '#ef4444',
           600: '#dc2626',
-        }
+        },
       },
       animation: {
         'slide-up': 'slideUp 0.3s ease-out',
@@ -625,7 +617,7 @@ module.exports = {
         'fade-in': 'fadeIn 0.3s ease-out',
         'fade-out': 'fadeOut 0.3s ease-out',
         'bounce-in': 'bounceIn 0.5s ease-out',
-        'shake': 'shake 0.5s ease-in-out',
+        shake: 'shake 0.5s ease-in-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
@@ -665,20 +657,20 @@ module.exports = {
         },
       },
       screens: {
-        'xs': '375px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
+        xs: '375px',
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
       },
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',
         'safe-bottom': 'env(safe-area-inset-bottom)',
-      }
+      },
     },
   },
   plugins: [],
-}
+};
 ```
 
 ### 2. Global Styles for Mobile
@@ -695,19 +687,21 @@ module.exports = {
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   html {
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
   }
-  
+
   body {
     @apply antialiased;
     overscroll-behavior: none;
   }
-  
+
   /* Remove input zoom on iOS */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -717,16 +711,16 @@ module.exports = {
   .pt-safe {
     padding-top: env(safe-area-inset-top);
   }
-  
+
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
-  
+
   /* Touch-friendly sizes */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
-  
+
   /* Prevent text selection */
   .no-select {
     -webkit-user-select: none;
@@ -747,10 +741,10 @@ module.exports = {
 'use client';
 
 import { useState } from 'react';
-import { 
-  importFromGoogleSheets, 
-  validateWords 
-} from '@/lib/utils/sheetsImport';
+import {
+  importFromGoogleSheets,
+  validateWords
+} from '@/lib/utils/cn/sheetsImport';
 import { saveWordsToFirebase, getWordsFromFirebase } from '@/lib/firebase/wordsService';
 import { Button } from '@/components/ui/Button';
 
@@ -764,7 +758,7 @@ export default function TestServicesPage() {
       setStatus('Importing...');
       const importedWords = await importFromGoogleSheets(sheetUrl);
       const { valid, invalid } = validateWords(importedWords);
-      
+
       setStatus(`Imported ${valid.length} words, ${invalid.length} invalid`);
       setWords(valid);
     } catch (error: any) {
@@ -794,11 +788,11 @@ export default function TestServicesPage() {
   };
 
   return (
-    
+
       Test Services
-      
-      
-        
+
+
+
           Google Sheets URL:
           <input
             type="text"
@@ -807,39 +801,39 @@ export default function TestServicesPage() {
             placeholder="https://docs.google.com/spreadsheets/d/..."
             className="w-full px-4 py-2 border rounded-lg"
           />
-        
-        
-        
+
+
+
           Import from Sheets
-          
+
             Save to Firebase
-          
-          
+
+
             Load from Firebase
-          
-        
-        
+
+
+
         {status && (
-          
+
             {status}
-          
+
         )}
-        
+
         {words.length > 0 && (
-          
+
             Words ({words.length}):
-            
+
               {words.map((word, i) => (
-                
+
                   {word.word} - {word.meaning}
                   {word.example && {word.example}}
-                
+
               ))}
-            
-          
+
+
         )}
-      
-    
+
+
   );
 }
 ```
@@ -879,7 +873,8 @@ npm run dev
 ➡️ **[Phase 3: UI Components Foundation](./PHASE_3_UI_Components_Foundation.md)**
 
 Trong Phase 3, chúng ta sẽ:
+
 - Tạo các UI components cơ bản
 - Layout components (Header, Container)
 - Animation wrappers
-- Loading & Error states  
+- Loading & Error states

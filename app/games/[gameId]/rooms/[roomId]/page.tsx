@@ -6,61 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Copy, Check, Crown, Users, Clock, ArrowLeft, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRoom } from '@/lib/api/hooks/useRoom';
+import { useUIStore } from '@/lib/store/uiStore';
 
-interface Player {
-  id: string;
-  name: string;
-  score: number;
-  isReady: boolean;
-  avatar?: string;
-}
-
-interface Room {
-  id: string;
-  hostId: string;
-  players: Player[];
-  status: 'waiting' | 'ready' | 'playing';
-  settings: {
-    maxPlayers: number;
-    questionsCount: number;
-    timePerQuestion: number;
-    difficulty: string;
-  };
-  createdAt: number;
-}
-
-export default function RoomPage() {
+export default function RoomWaitingPage() {
   const params = useParams();
   const router = useRouter();
-  const roomId = (params.id as string) || '';
+  const gameId = (params.gameId as string) || '';
+  const roomId = (params.roomId as string) || '';
 
-  const [currentPlayerId] = useState('player-1'); // TODO: Lấy từ store
-  const [room, setRoom] = useState<Room | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [currentPlayerId] = useState('player-1');
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    // Simulate loading room data
-    setTimeout(() => {
-      setRoom({
-        id: roomId,
-        hostId: currentPlayerId,
-        players: [
-          { id: currentPlayerId, name: 'Bạn', score: 0, isReady: false },
-          { id: 'player-2', name: 'Người chơi 2', score: 0, isReady: false },
-        ],
-        status: 'waiting',
-        settings: {
-          maxPlayers: 8,
-          questionsCount: 10,
-          timePerQuestion: 30,
-          difficulty: 'mixed',
-        },
-        createdAt: Date.now(),
-      });
-      setLoading(false);
-    }, 500);
-  }, [roomId, currentPlayerId]);
+  // Using TanStack Query instead of Redux
+  const { data: room, isLoading } = useRoom(roomId);
+  // console.log('🚀 ~ RoomWaitingPage ~ room:', room);
+  // const { mutate: updateReady } = useUpdatePlayerReady();
 
   const handleCopyRoomCode = () => {
     navigator.clipboard.writeText(roomId);
@@ -69,7 +30,13 @@ export default function RoomPage() {
   };
 
   const handleToggleReady = () => {
-    // TODO: Cập nhật trạng thái ready
+    if (room) {
+      // updateReady({
+      //   roomId: room.id,
+      //   playerId: currentPlayerId,
+      //   isReady: !room.players.find((p) => p.id === currentPlayerId)?.isReady,
+      // });
+    }
   };
 
   const handleStartGame = () => {
@@ -84,22 +51,29 @@ export default function RoomPage() {
     router.push('/lobby');
   };
 
-  if (loading) {
+  // useEffect(() => {
+  //   if (!room?.hostId) {
+  //     router.push('/lobby');
+  //   }
+  // }, [room?.hostId, router]);
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Đang tải phòng...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Đang tải dữ liệu phòng...</p>
       </div>
     );
   }
 
   if (!room) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Không tìm thấy phòng...</p>
+      </div>
+    );
   }
 
-  const isHost = room.hostId === currentPlayerId;
+  const isHost = room.players.some((player) => player.id === currentPlayerId);
   const allReady = room.players.every((p) => p.isReady);
 
   return (
@@ -139,13 +113,36 @@ export default function RoomPage() {
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <Users className="w-5 h-5 text-blue-600 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-600">Người chơi</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {room.players.length}/{room.settings.maxPlayers}
-                  </p>
+              <div className="flex flex-row">
+                {/* Người chơi */}
+                <div className="flex items-start gap-3">
+                  <Users className="w-5 h-5 text-blue-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-600">Người chơi</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {room.players.length}/{room.settings.maxPlayers}
+                    </p>
+                  </div>
+                </div>
+                {/* Câu hỏi */}
+                <div className="flex items-start gap-3">
+                  <Zap className="w-5 h-5 text-purple-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-600">Câu hỏi</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {/* {room.settings.questionsCount} */}
+                    </p>
+                  </div>
+                </div>
+                {/* Thời gian/Câu */}
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-orange-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-600">Thời gian/Câu</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {room.settings.timePerQuestion}s
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -157,7 +154,7 @@ export default function RoomPage() {
                 <div>
                   <p className="text-sm text-gray-600">Câu hỏi</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {room.settings.questionsCount}
+                    {/* {room.settings.questionsCount} */}
                   </p>
                 </div>
               </div>
@@ -204,7 +201,7 @@ export default function RoomPage() {
                           {player.name}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {player.id === room.hostId
+                          {player.id === room.players[0].id
                             ? 'Chủ phòng'
                             : 'Người chơi'}
                         </p>

@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Plus, LogIn, User, Users, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { Header } from '@/components/layout/Header';
 
 export default function LobbyPage() {
   const router = useRouter();
@@ -63,212 +64,141 @@ export default function LobbyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.push('/')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Chơi Online</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-[color-mix(in_srgb,var(--primary-color)_10%,white)] via-white to-[color-mix(in_srgb,var(--primary-color)_5%,white)]">
+      <Header />
 
-      {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Kết Nối Và Chơi Với Bạn Bè
-          </h2>
-          <p className="text-lg text-gray-600">
-            Tạo hoặc tham gia một phòng để bắt đầu chơi realtime cùng những
-            người chơi khác
-          </p>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8">
-          <button
-            onClick={() => setActiveTab('create')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-              activeTab === 'create'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300'
-            }`}
-          >
-            <Plus className="w-5 h-5 inline-block mr-2" />
-            Tạo Phòng
-          </button>
-          <button
-            onClick={() => setActiveTab('join')}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
-              activeTab === 'join'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300'
-            }`}
-          >
-            <LogIn className="w-5 h-5 inline-block mr-2" />
-            Vào Phòng
-          </button>
-        </div>
-
-        {/* Error Message */}
-        {error && (
+      <div className="flex items-center justify-center min-h-[calc(100vh-180px)] px-4 pb-8">
+        <div className="w-full max-w-md">
+          {/* Animated Card */}
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+            transition={{ duration: 0.5 }}
           >
-            {error}
-          </motion.div>
-        )}
-
-        {/* Create Room Tab */}
-        {activeTab === 'create' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="w-5 h-5" />
-                  Tạo Phòng Mới
+            <Card className="border-0 shadow-xl">
+              <CardHeader className="bg-[var(--primary-color)] text-white rounded-t-lg">
+                <CardTitle className="text-center text-2xl">
+                  Tham Gia Trò Chơi
                 </CardTitle>
+                <p className="text-center text-white/80 text-sm mt-2">
+                  Nhập mã phòng và tên của bạn
+                </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <p className="text-gray-600 mb-4">
-                    Nhập tên của bạn và tạo phòng. Bạn sẽ nhận được mã phòng để
-                    chia sẻ với bạn bè.
-                  </p>
+
+              <CardContent className="pt-6 space-y-5">
+                {/* Error Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                {/* Room Code Input */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    <Users className="inline w-4 h-4 mr-2" />
+                    Mã Phòng
+                  </label>
+                  <Input
+                    placeholder="VD: A1B2C3"
+                    value={roomCode}
+                    onChange={(e) => {
+                      setRoomCode(e.target.value.toUpperCase());
+                      setError('');
+                    }}
+                    disabled={loading}
+                    maxLength={6}
+                    className="text-center text-lg font-bold tracking-widest uppercase border-2 border-gray-200 focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary-color)_20%,transparent)]"
+                  />
                 </div>
 
-                <Input
-                  label="Tên của bạn"
-                  value={playerName}
-                  onChange={(e) => {
-                    setPlayerName(e.target.value);
-                    setError('');
-                  }}
-                  placeholder="Nhập tên của bạn..."
-                  maxLength={20}
-                />
+                {/* Player Name Input */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    <User className="inline w-4 h-4 mr-2" />
+                    Tên Hiển Thị
+                  </label>
+                  <Input
+                    placeholder="Nhập tên của bạn"
+                    value={playerName}
+                    onChange={(e) => {
+                      setPlayerName(e.target.value);
+                      setError('');
+                    }}
+                    disabled={loading}
+                    maxLength={20}
+                    className="border-2 border-gray-200 focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--primary-color)_20%,transparent)]"
+                  />
+                </div>
 
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="pt-4">
-                    <div className="flex gap-3">
-                      <Users className="w-5 h-5 text-blue-600 shrink-0 mt-1" />
-                      <div className="text-sm text-blue-900">
-                        <p className="font-semibold mb-1">Điều khoản phòng:</p>
-                        <ul className="space-y-1 text-xs">
-                          <li>• Tối đa 8 người chơi</li>
-                          <li>• 10 câu hỏi mỗi ván</li>
-                          <li>• 30 giây mỗi câu hỏi</li>
-                        </ul>
+                {/* Join Button */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    onClick={handleJoinRoom}
+                    disabled={loading || !roomCode.trim() || !playerName.trim()}
+                    className="w-full bg-[var(--primary-color)] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-all duration-200 text-base"
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Vào phòng...
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <LogIn className="w-5 h-5" />
+                        Tham Gia Phòng
+                      </div>
+                    )}
+                  </Button>
+                </motion.div>
 
-                <Button
-                  onClick={handleCreateRoom}
-                  isLoading={loading}
-                  loadingText="Đang tạo phòng..."
-                  className="w-full h-12"
+                {/* Divider */}
+                <div className="relative py-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Hoặc</span>
+                  </div>
+                </div>
+
+                {/* Create Room Button */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Plus className="w-5 h-5" />
-                  Tạo Phòng
-                </Button>
+                  <Button
+                    onClick={() => router.push('/games')}
+                    variant="outline"
+                    className="w-full border-2 border-[var(--primary-color)] text-[var(--primary-color)] hover:bg-[color-mix(in_srgb,var(--primary-color)_5%,white)] font-bold py-3 rounded-lg transition-all duration-200 text-base"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Tạo Phòng Mới
+                  </Button>
+                </motion.div>
               </CardContent>
             </Card>
           </motion.div>
-        )}
 
-        {/* Join Room Tab */}
-        {activeTab === 'join' && (
+          {/* Info Box */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-6 bg-[color-mix(in_srgb,var(--primary-color)_10%,white)] border border-[color-mix(in_srgb,var(--primary-color)_30%,transparent)] rounded-lg p-4"
           >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LogIn className="w-5 h-5" />
-                  Vào Phòng
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <p className="text-gray-600 mb-4">
-                    Nhập tên của bạn và mã phòng mà bạn bè chia sẻ để tham gia.
-                  </p>
-                </div>
-
-                <Input
-                  label="Tên của bạn"
-                  value={playerName}
-                  onChange={(e) => {
-                    setPlayerName(e.target.value);
-                    setError('');
-                  }}
-                  placeholder="Nhập tên của bạn..."
-                  maxLength={20}
-                />
-
-                <Input
-                  label="Mã Phòng"
-                  value={roomCode}
-                  onChange={(e) => {
-                    setRoomCode(e.target.value.toUpperCase());
-                    setError('');
-                  }}
-                  placeholder="VD: ABC123"
-                  maxLength={6}
-                  helperText="Mã phòng gồm 6 ký tự hoa"
-                />
-
-                <Button
-                  onClick={handleJoinRoom}
-                  isLoading={loading}
-                  loadingText="Đang tham gia phòng..."
-                  className="w-full h-12"
-                  variant="secondary"
-                >
-                  <LogIn className="w-5 h-5" />
-                  Vào Phòng
-                </Button>
-              </CardContent>
-            </Card>
+            <p className="text-sm text-[color-mix(in_srgb,var(--primary-color)_80%,black)]">
+              💡 <span className="font-semibold">Mã phòng</span> là 6 ký tự được
+              cấp khi tạo phòng. Hỏi người tạo phòng để lấy mã.
+            </p>
           </motion.div>
-        )}
-
-        {/* Quick Stats */}
-        <div className="mt-12 grid grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-blue-600">1.2K</p>
-              <p className="text-xs text-gray-600 mt-2">Phòng Hoạt Động</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-green-600">8.5K</p>
-              <p className="text-xs text-gray-600 mt-2">Người Chơi Online</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-purple-600">45K</p>
-              <p className="text-xs text-gray-600 mt-2">Trận Chơi Hôm Nay</p>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

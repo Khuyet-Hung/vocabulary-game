@@ -1,26 +1,24 @@
 import { create } from 'zustand';
+import { Player } from '../types';
 
 interface UIState {
-  isModalOpen: boolean;
-  modalContent: React.ReactNode | null;
-  toast: {
-    message: string;
-    type: 'success' | 'error' | 'info';
-  } | null;
-  
-  openModal: (content: React.ReactNode) => void;
-  closeModal: () => void;
-  showToast: (message: string, type: 'success' | 'error' | 'info') => void;
-  hideToast: () => void;
+    currentPlayer: Player | null;
+    isLoading: boolean;
+    setCurrentPlayer: (player: Player | null) => void;
+    setIsLoading: (loading: boolean) => void;
+    reset: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  isModalOpen: false,
-  modalContent: null,
-  toast: null,
-  
-  openModal: (content) => set({ isModalOpen: true, modalContent: content }),
-  closeModal: () => set({ isModalOpen: false, modalContent: null }),
-  showToast: (message, type) => set({ toast: { message, type } }),
-  hideToast: () => set({ toast: null })
+    currentPlayer: null,
+    isLoading: false,
+
+    setCurrentPlayer: (player) => set({ currentPlayer: player }),
+
+    setIsLoading: (loading) => set({ isLoading: loading }),
+
+    reset: () => set({
+        currentPlayer: null,
+        isLoading: false,
+    }),
 }));
