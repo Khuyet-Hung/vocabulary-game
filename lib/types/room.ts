@@ -2,7 +2,6 @@ import { GameSettings, Player } from "./game";
 
 export interface Room {
     id: string;
-    hostPlayer: Player;
     players: Player[];
     status: 'waiting' | 'playing' | 'finished';
     gameMode: string;

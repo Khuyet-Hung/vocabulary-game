@@ -110,12 +110,12 @@ export default function GamesPage() {
     const hostPlayer: Player = {
       id: id,
       name: `Host_${id}`,
+      isHost: true,
       score: 0,
       isReady: false,
       joinedAt: Date.now(),
     };
     const roomData: CreateRoom = {
-      hostPlayer,
       players: [hostPlayer],
       status: 'waiting',
       createdAt: Date.now(),

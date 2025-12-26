@@ -2,6 +2,7 @@ export interface Player {
   id: string;
   name: string;
   score: number;
+  isHost: boolean;
   // avatar?: string;
   isReady: boolean;
   joinedAt: number;

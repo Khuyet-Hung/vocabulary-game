@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, VT323 } from 'next/font/google';
 import './globals.css';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { QueryProvider } from '@/components/providers/QueryProvider';
+import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${vt323.variable} antialiased`}
       >
+        <Toaster position="top-center" />
         <QueryProvider>
           {children}
           <BottomNav />
