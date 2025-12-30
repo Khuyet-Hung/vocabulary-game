@@ -11,73 +11,48 @@ import {
   Lock,
   ArrowLeft,
   Star,
+  PiIcon,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
-import { CreateRoom, Player, Room } from '@/lib/types';
+import {
+  CreatePlayer,
+  CreateRoom,
+  Game,
+  Player,
+  PrefixEnum,
+  Room,
+  StorageKeyEnum,
+} from '@/lib/types';
 import { useCreateRoom } from '@/lib/api/hooks/useRoom';
 import { toast } from 'sonner';
-
-interface GameCard {
-  id: string;
-  title: string;
-  description: string;
-  icon: any;
-  gradient: string;
-  status: 'available' | 'coming-soon';
-  difficulty: 'easy' | 'medium' | 'hard';
-  players?: number;
-}
-
-const games: GameCard[] = [
-  {
-    id: 'flashcard',
-    title: 'Flashcard',
-    description: 'Lật thẻ và ghi nhớ từ vựng nhanh chóng',
-    icon: Sparkles,
-    gradient: 'from-purple-500 to-pink-500',
-    status: 'available',
-    difficulty: 'easy',
-    players: 2340,
-  },
-  {
-    id: 'multiple-choice',
-    title: 'Trắc Nghiệm',
-    description: 'Chọn đáp án đúng và nâng cao kỹ năng',
-    icon: Zap,
-    gradient: 'from-blue-500 to-cyan-500',
-    status: 'available',
-    difficulty: 'medium',
-    players: 5120,
-  },
-  {
-    id: 'fill-blank',
-    title: 'Điền Từ',
-    description: 'Hoàn thành câu với từ phù hợp nhất',
-    icon: Brain,
-    gradient: 'from-green-500 to-emerald-500',
-    status: 'available',
-    difficulty: 'hard',
-    players: 1890,
-  },
-  {
-    id: 'matching',
-    title: 'Ghép Đôi',
-    description: 'Nối từ với nghĩa tương ứng nhanh nhất',
-    icon: Target,
-    gradient: 'from-orange-500 to-red-500',
-    status: 'coming-soon',
-    difficulty: 'medium',
-  },
-];
-
-const randomRoomId = () => {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-};
+import { generateId } from '@/lib/utils/idGenerator';
+import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
+import { serverTimestamp } from 'firebase/database';
+import {
+  useCreatePlayer,
+  usePlayer,
+  useUpdatePlayer,
+} from '@/lib/api/hooks/usePlayer';
+import { useListGame } from '@/lib/api/hooks/useGame';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function GamesPage() {
   const router = useRouter();
-  const { mutate: createRoom, isPending } = useCreateRoom();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: createRoom, isPending } = useCreateRoom();
+  const { mutateAsync: createPlayer, isPending: isCreatingPlayer } =
+    useCreatePlayer();
+  const [playerId, setPlayerId] = useLocalStorage<string>(
+    StorageKeyEnum.CURRENT_PLAYER_ID,
+    ''
+  );
+  const { data: player, isLoading: isLoadingPlayer } = usePlayer(
+    playerId || null
+  );
+  const { data: games = [], isLoading: isLoadingGames } = useListGame();
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -106,35 +81,44 @@ export default function GamesPage() {
   };
 
   const handleCreateRoom = async (gameId: string) => {
-    const id = randomRoomId();
-    const hostPlayer: Player = {
-      id: id,
-      name: `Host_${id}`,
-      isHost: true,
-      score: 0,
-      isReady: false,
-      joinedAt: Date.now(),
-    };
-    const roomData: CreateRoom = {
-      players: [hostPlayer],
-      status: 'waiting',
-      createdAt: Date.now(),
-      settings: {
-        maxPlayers: 4,
-        timeLimitPerGame: 300,
-      },
-      gameMode: gameId,
-    };
+    try {
+      const game = games?.find((g) => g.id === gameId);
+      if (!game) {
+        toast.error('Game không tồn tại.');
+        return;
+      }
 
-    createRoom(roomData, {
-      onSuccess: (roomId) => {
-        router.push(`/games/${gameId}/rooms/${roomId}`);
-      },
-      onError: (error) => {
-        toast.error(`Lỗi tạo phòng: ${error.message}`);
-      },
-    });
+      let currentPlayerId = playerId;
+
+      // Kiểm tra và tạo player nếu chưa có
+      if (!player?.id) {
+        const hostPlayer: CreatePlayer = {
+          name: `Tôi là Host`,
+        };
+        currentPlayerId = await createPlayer(hostPlayer);
+        setPlayerId(currentPlayerId); // Set vào localStorage để lần sau dùng
+      } else {
+        currentPlayerId = player.id;
+      }
+
+      // Dùng currentPlayerId thay vì playerId
+      const roomData: CreateRoom = {
+        players: { [currentPlayerId]: true },
+        status: 'waiting',
+        gameId: gameId,
+        hostPlayerId: currentPlayerId,
+        createdAt: serverTimestamp(),
+        gameSettings: game.defaultSettings || {},
+      };
+
+      const newRoomId = await createRoom(roomData);
+      router.push(`/room/${newRoomId}`);
+    } catch (error) {
+      toast.error('Đã có lỗi xảy ra. Vui lòng thử lại.');
+    }
   };
+
+  const isLoading = isLoadingPlayer || isCreatingPlayer;
 
   return (
     <>
@@ -143,103 +127,88 @@ export default function GamesPage() {
         <Header />
         <div className="max-w-6xl mx-auto px-4 pb-12">
           {/* Games Grid */}
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {games.map((game, index) => {
-              const Icon = game.icon;
-              const isLocked = game.status === 'coming-soon';
+          {!games || games.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              <Sparkles className="w-10 h-10 mx-auto mb-4 animate-spin-slow" />
+              <p className="text-lg">Đang cập nhật các game mode mới...</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              {games.map((game, index) => {
+                const Icon = PiIcon;
+                const isLocked = false;
 
-              return (
-                <motion.div
-                  key={game.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <div
-                    className={`relative group ${isLocked ? 'opacity-75' : ''}`}
+                return (
+                  <motion.div
+                    key={game.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
                     <div
-                      className={`absolute inset-0 bg-gradient-to-r ${game.gradient} rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity`}
-                    />
-
-                    <Card className="relative border-0 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
-                      {/* Gradient Top Bar */}
+                      className={`relative group ${
+                        isLocked ? 'opacity-75' : ''
+                      }`}
+                    >
                       <div
-                        className={`h-1 bg-gradient-to-r ${game.gradient}`}
+                        className={`absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity`}
                       />
 
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3">
-                            <div
-                              className={`p-3 rounded-xl bg-gradient-to-r ${game.gradient} text-white`}
-                            >
-                              <Icon className="w-6 h-6" />
+                      <Card className="relative border-0 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+                        {/* Gradient Top Bar */}
+                        <div
+                          className={`h-1 bg-gradient-to-r from-green-500 to-emerald-500`}
+                        />
+
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                              <div
+                                className={`p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white`}
+                              >
+                                <Icon className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-xl">
+                                  {game.name}
+                                </CardTitle>
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className="text-xl">
-                                {game.title}
-                              </CardTitle>
-                              {!isLocked && (
-                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                                  <span
-                                    className={`px-2 py-1 rounded-full ${getDifficultyColor(
-                                      game.difficulty
-                                    )}`}
-                                  >
-                                    {getDifficultyLabel(game.difficulty)}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                            {isLocked && (
+                              <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                            )}
                           </div>
-                          {isLocked && (
-                            <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                          )}
-                        </div>
-                      </CardHeader>
+                        </CardHeader>
 
-                      <CardContent className="space-y-4">
-                        <p className="text-gray-600">{game.description}</p>
+                        <CardContent className="space-y-4">
+                          <p className="text-gray-600">{game.description}</p>
 
-                        {!isLocked && game.players && (
-                          <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-                            <Star className="w-4 h-4 text-yellow-500" />
-                            <span>
-                              {game.players
-                                .toString()
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
-                              người chơi
-                            </span>
-                          </div>
-                        )}
-
-                        <Button
-                          className="w-full h-11"
-                          disabled={isLocked || isPending}
-                          onClick={() =>
-                            isLocked ? null : handleCreateRoom(game.id)
-                          }
-                        >
-                          {isLocked ? (
-                            <>
-                              <Lock className="w-4 h-4 mr-2" />
-                              Sắp Ra Mắt
-                            </>
-                          ) : isPending ? (
-                            'Đang tạo...'
-                          ) : (
-                            'Tạo phòng'
-                          )}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
+                          <Button
+                            className="w-full h-11"
+                            disabled={isLocked || isPending}
+                            onClick={() =>
+                              isLocked ? null : handleCreateRoom(game.id)
+                            }
+                          >
+                            {isLocked ? (
+                              <>
+                                <Lock className="w-4 h-4 mr-2" />
+                                Sắp Ra Mắt
+                              </>
+                            ) : isPending ? (
+                              'Đang tạo...'
+                            ) : (
+                              'Tạo phòng'
+                            )}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
           {/* Info Section */}
           <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
             <CardContent className="pt-6">

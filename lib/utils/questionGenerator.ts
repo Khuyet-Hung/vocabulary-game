@@ -12,16 +12,16 @@ export function generateMultipleChoiceQuestion(
     .filter((w) => w.id !== targetWord.id)
     .sort(() => Math.random() - 0.5)
     .slice(0, 3);
-  
+
   // Combine with correct answer
   const options = [
     targetWord.meaning,
     ...wrongWords.map((w) => w.meaning)
   ];
-  
+
   // Shuffle options
   const shuffledOptions = options.sort(() => Math.random() - 0.5);
-  
+
   return {
     id: `q_${targetWord.id}`,
     word: targetWord,
@@ -40,7 +40,7 @@ export function generateFillBlankQuestion(word: Word): Question {
     new RegExp(word.word, 'gi'),
     '______'
   );
-  
+
   return {
     id: `q_${word.id}`,
     word: { ...word, example: blankedSentence },
@@ -68,25 +68,25 @@ export function generateFlashcard(word: Word): Question {
  */
 export function generateQuestions(
   words: Word[],
-  gameMode: string,
+  gameCode: string,
   count: number
 ): Question[] {
   const selectedWords = words.slice(0, count);
-  
-  switch (gameMode) {
+
+  switch (gameCode) {
     case 'multiple-choice':
       return selectedWords.map((word) =>
         generateMultipleChoiceQuestion(word, words)
       );
-    
+
     case 'fill-blank':
       return selectedWords
         .filter((word) => word.example)
         .map((word) => generateFillBlankQuestion(word));
-    
+
     case 'flashcard':
       return selectedWords.map((word) => generateFlashcard(word));
-    
+
     default:
       return [];
   }

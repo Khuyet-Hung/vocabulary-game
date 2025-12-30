@@ -1,6 +1,6 @@
 import { ref, set, get, push, serverTimestamp, onValue, Unsubscribe, query, orderByChild, equalTo } from 'firebase/database';
 import { database } from '../../firebase/config';
-import { CreateRoom, GameSettings, Room } from '../../types';
+import { CreateRoom, Player, Room } from '../../types';
 import { generateRoomCode } from '../../utils/idGenerator';
 
 /**
@@ -82,12 +82,7 @@ async function createRoom(
     try {
         const roomId = generateRoomCode();
         const roomRef = ref(database, `rooms/${roomId}`);
-        const roomData: CreateRoom = {
-            ...roomPayload,
-            createdAt: serverTimestamp(),
-        };
-
-        await set(roomRef, roomData);
+        await set(roomRef, roomPayload);
         return roomId;
     } catch (error) {
         console.error('Error creating room in Firebase:', error);
@@ -111,12 +106,48 @@ async function checkRoomInFirebase(
     }
 }
 
+/**
+ * Update room
+ */
+async function updateRoom(
+    roomPayload: Room
+): Promise<string> {
+    try {
+        const roomRef = ref(database, `rooms/${roomPayload.id}`);
+        await set(roomRef, roomPayload);
+        return roomPayload.id;
+    } catch (error) {
+        console.error('Error updating room in Firebase:', error);
+        throw error;
+    }
+}
+
+/**
+ * Join room
+ */
+async function joinRoom(
+    roomId: string,
+    playerId: string
+): Promise<string> {
+    try {
+        const roomRef = ref(database, `rooms/${roomId}/players/${playerId}`);
+        await set(roomRef, true);
+        return playerId;
+    } catch (error) {
+        console.error('Error updating room in Firebase:', error);
+        throw error;
+    }
+}
+
+
 const roomsService = {
     getRoomData,
     getRoomByHostId,
     subscribeToRoom,
     createRoom,
     checkRoomInFirebase,
+    updateRoom,
+    joinRoom
 };
 
 export default roomsService;

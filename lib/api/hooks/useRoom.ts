@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import React from 'react';
-import roomsService from '../services/roomsService';
-import { Room, Player, CreateRoom } from '../../types';
+import roomsService from '../services/roomService';
+import { Room, CreateRoom } from '../../types';
 
 // Query keys factory
 export const roomKeys = {
@@ -12,7 +12,7 @@ export const roomKeys = {
 };
 
 // Hooks for room queries by roomId
-export function useRoom(roomId: string | null) {
+export function useDetailRoom(roomId: string | null) {
     const queryClient = useQueryClient();
 
     useEffect(() => {
@@ -53,24 +53,44 @@ export function useCreateRoom() {
     });
 }
 
-// export function useJoinRoom() {
-//     const queryClient = useQueryClient();
+export function useUpdateRoom() {
+    const queryClient = useQueryClient();
 
-//     return useMutation({
-//         mutationFn: async ({
-//             roomId,
-//             player,
-//         }: {
-//             roomId: string;
-//             player: Player;
-//         }) => {
-//             return await roomsService.joinRoom(roomId, player);
-//         },
-//         onSuccess: (_, { roomId }) => {
-//             queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) });
-//         },
-//     });
-// }
+    return useMutation({
+        mutationFn: async (roomPayload: Room) => {
+            return await roomsService.updateRoom(roomPayload);
+        },
+        onSuccess: (updatedRoom, { id }) => {
+            // Update cache ngay lập tức
+            queryClient.setQueryData(
+                roomKeys.detail(id),
+                updatedRoom
+            );
+        },
+    });
+}
+
+export function useJoinRoom() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            roomId,
+            playerId,
+        }: {
+            roomId: string;
+            playerId: string;
+        }) => {
+            return await roomsService.joinRoom(roomId, playerId);
+        },
+        onSuccess: (playerId, { roomId }) => {
+            // Invalidate room query để trigger refetch dữ liệu mới từ Firebase
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.detail(roomId),
+            });
+        },
+    });
+}
 
 // export function useLeaveRoom() {
 //     const queryClient = useQueryClient();
@@ -85,8 +105,11 @@ export function useCreateRoom() {
 //         }) => {
 //             return await roomsService.removePlayerFromRoom(roomId, playerId);
 //         },
-//         onSuccess: (_, { roomId }) => {
-//             queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) });
+//         onSuccess: (updatedRoom, { roomId }) => {
+//             queryClient.setQueryData(
+//                 roomKeys.detail(roomId),
+//                 updatedRoom
+//             );
 //         },
 //     });
 // }
@@ -106,8 +129,11 @@ export function useCreateRoom() {
 //         }) => {
 //             return await roomsService.updatePlayerReady(roomId, playerId, isReady);
 //         },
-//         onSuccess: (_, { roomId }) => {
-//             queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) });
+//         onSuccess: (updatedRoom, { roomId }) => {
+//             queryClient.setQueryData(
+//                 roomKeys.detail(roomId),
+//                 updatedRoom
+//             );
 //         },
 //     });
 // }
@@ -127,8 +153,11 @@ export function useCreateRoom() {
 //         }) => {
 //             return await roomsService.updatePlayerScore(roomId, playerId, points);
 //         },
-//         onSuccess: (_, { roomId }) => {
-//             queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) });
+//         onSuccess: (updatedRoom, { roomId }) => {
+//             queryClient.setQueryData(
+//                 roomKeys.detail(roomId),
+//                 updatedRoom
+//             );
 //         },
 //     });
 // }

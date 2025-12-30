@@ -5,9 +5,14 @@ import { Gamepad2, Users, Trophy, BookOpen, Zap, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { DotLottiePlayer } from '@dotlottie/react-player';
+import { useEffect } from 'react';
+import { seedGames } from '@/lib/seeds/gameSeed/seedDatabase';
 
 export default function HomePage() {
   const router = useRouter();
+  useEffect(() => {
+    seedGames();
+  }, []);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50">
@@ -32,7 +37,7 @@ export default function HomePage() {
             <div className="flex flex-col gap-3 w-full sm:max-w-sm items-center mt-8">
               <Button
                 className="w-[80%] h-12 text-base font-semibold bg-[var(--primary-color)] text-white"
-                onClick={() => router.push('/lobby')}
+                onClick={() => router.push('/join')}
               >
                 Tham gia ngay
               </Button>

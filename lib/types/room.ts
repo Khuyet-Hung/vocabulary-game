@@ -1,15 +1,17 @@
-import { GameSettings, Player } from "./game";
+import { GameSettings } from "./game-settings";
+import { CreatePlayer, Player } from "./player";
 
 export interface Room {
     id: string;
-    players: Player[];
+    players: Record<string, boolean>;
+    hostPlayerId: string;
     status: 'waiting' | 'playing' | 'finished';
-    gameMode: string;
-    settings: GameSettings;
-    createdAt: any;
-    startedAt?: any;
-    finishedAt?: any;
-    expiredAt?: any;
+    gameId: string;
+    gameSettings: Record<string, any>;
+    createdAt: object;
+    startedAt?: object;
+    finishedAt?: object;
+    expiredAt?: object;
 }
 
-export type CreateRoom = Omit<Room, 'id' | 'startedAt' | 'finishedAt' | 'expiredAt'>;
+export type CreateRoom = Omit<Room, 'id'>;

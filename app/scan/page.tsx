@@ -38,10 +38,7 @@ export default function QRScannerPage() {
     setIsProcessing(true);
     toast.success('Quét thành công!');
 
-    // Chuyển hướng sau 1 giây
-    setTimeout(() => {
-      router.push(scannedValue);
-    }, 1000);
+    router.push(scannedValue);
   };
 
   const handleScanError = (error: any) => {
